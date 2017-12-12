@@ -182,51 +182,45 @@ whitePollution[whitePollution < 0] <- 0
 library(highcharter)
 
 #incomehist
-highchart() %>% 
+incomehist <- highchart() %>% 
   hc_add_series_labels_values(incomePollution$incomeRounded, incomePollution$wasteNear, name = "Nearby facilities", type = "scatter") %>% 
   hc_title(text = "More animal agriculture facilities in poorer areas") %>%
   hc_xAxis(title = list(text = "Community income percentile"), data = incomePollution$incomeRounded) %>%
   hc_yAxis(title = list(text = "Waste-producing facilities")) %>%
-  hc_add_series(incomePollution$`0.95UCLNear`, name = "95% CI (high)", type = "line", color = "#868e96")  %>%
-  hc_add_series(incomePollution$medianNear, name = "Predicted value", type = "line", color = "#343a40")  %>%
-  hc_add_series(incomePollution$`0.95LCLNear`, name = "95% CI (low)", type = "line", color = "#868e96")  %>%
-  hc_tooltip(valueDecimals = 0, shape = "rectangle", shared = TRUE, table = TRUE) %>%
+  hc_add_series(incomePollution, hcaes(x = incomeRounded, low = round(`0.95LCLNear`), high = round(`0.95UCLNear`)),  color = "#7e7e7e", name = "95% CI", type = "arearange")  %>%
+  hc_tooltip(valueDecimals = 0, shape = "rectangle") %>%
   hc_legend(enabled = FALSE) %>%
   hc_credits(enabled = TRUE, text = "Source: CPS & TRI, 2011-2015")
 
 #racehist
-highchart() %>% 
+racehist <- highchart() %>% 
   hc_add_series_labels_values(whitePollution$whiteRounded, whitePollution$wasteNear, name = "Nearby facilities", type = "scatter") %>%
   hc_title(text = "More animal agriculture faciltiies in non-white areas") %>%
   hc_xAxis(title = list(text = "Community white percentile"), data = whitePollution$incomeRounded) %>%
   hc_yAxis(title = list(text = "Waste-producing facilities")) %>%
-  hc_add_series(whitePollution$`0.95UCLNear`, name = "95% CI (high)", type = "line", color = "#868e96", shape = "diamond")  %>%
-  hc_add_series(whitePollution$medianNear, name = "Predicted value", type = "line", color = "#343a40")  %>%
-  hc_add_series(whitePollution$`0.95LCLNear`, name = "95% CI (low)", type = "line", color = "#868e96", shape = "diamond")  %>%
-  hc_tooltip(valueDecimals = 0, shape = "rectangle", shared = TRUE, table = TRUE) %>%
+  hc_add_series(whitePollution, hcaes(x = whiteRounded, low = round(`0.95LCLNear`), high = round(`0.95UCLNear`)),  color = "#7e7e7e", name = "95% CI", type = "arearange")  %>%
+  hc_tooltip(valueDecimals = 0, shape = "rectangle", shared = TRUE) %>%
   hc_legend(enabled = FALSE) %>%
   hc_credits(enabled = TRUE, text = "Source: CPS & TRI, 2011-2015")
 
 #plot race and nearby waste count
-highchart() %>%
+raceWaste <- highchart() %>%
   hc_title(text = "Varied animal agriculture waste in (non)white areas") %>%
   hc_xAxis(title = list(text = "Community white percentile"), data = whitePollution$whiteRounded) %>%
   hc_yAxis(title = list(text = "Total nearby waste (lbs)")) %>%
-  hc_add_series(whitePollution$wasteProxSum, name = "Waste nearby", type = "scatter")  %>%
-  hc_tooltip(valueDecimals = 0, shape = "rectangle", shared = TRUE, table = TRUE) %>%
+  hc_add_series_labels_values(whitePollution$whiteRounded, whitePollution$wasteProxSum, name = "Waste nearby", type = "scatter")  %>%
+  hc_tooltip(valueDecimals = 0, shape = "rectangle", shared = TRUE) %>%
   hc_legend(enabled = FALSE) %>%
   hc_credits(enabled = TRUE, text = "Source: CPS & TRI, 2011-2015")
 
 #plot income and nearby waste count
-highchart() %>%
+incomeWaste <- highchart() %>%
+  hc_add_series_labels_values(incomePollution$incomeRounded, incomePollution$wasteProxSum, name = "Waste nearby", type = "scatter")  %>%
   hc_title(text = "More animal agriculture waste in poorer communities") %>%
   hc_xAxis(title = list(text = "Community income percentile"), data = incomePollution$incomeRounded) %>%
-  hc_yAxis(title = list(text = "Total nearby waste (lbs)")) %>%
-  hc_add_series(incomePollution$wasteProxSum, name = "Waste nearby", type = "scatter")  %>%
-  hc_add_series(incomePollution$`0.95UCL`, name = "95% CI (high)", type = "line", color = "#868e96", shape = "diamond")  %>%
-  hc_add_series(incomePollution$median, name = "Predicted value", type = "line", color = "#343a40")  %>%
-  hc_add_series(incomePollution$`0.95LCL`, name = "95% CI (low)", type = "line", color = "#868e96", shape = "diamond")  %>%
-  hc_tooltip(valueDecimals = 0, shape = "rectangle", shared = TRUE, table = TRUE) %>%
+  hc_yAxis(min = 0, title = list(text = "Total nearby waste (lbs)")) %>%
+  hc_add_series(incomePollution, hcaes(x = incomeRounded, low = round(`0.95LCL`), high = round(`0.95UCL`)),  color = "#7e7e7e", name = "95% CI", type = "arearange")  %>%
+  hc_tooltip(valueDecimals = 0, shape = "rectangle", shared = TRUE) %>%
   hc_legend(enabled = FALSE) %>%
   hc_credits(enabled = TRUE, text = "Source: CPS & TRI, 2011-2015")
 
@@ -235,7 +229,7 @@ worseThanDuplin <- blckPop[blckPop$wasteProx >= 635196  & blckPop$incomePopPctil
 worseThanDuplin$FIPS <- paste0(worseThanDuplin$STATEA, worseThanDuplin$COUNTYA, worseThanDuplin$TRACTA, worseThanDuplin$BLKGRPA)
 
 #duplin chart
-highchart() %>%
+likeDuplin <- highchart() %>%
   hc_title(text = "Areas with more waste and less income than Duplin") %>%
   hc_xAxis(title = list(text = "Community income percentile")) %>%
   hc_yAxis(title = list(text = "Total nearby waste (log(1+lbs))")) %>%
